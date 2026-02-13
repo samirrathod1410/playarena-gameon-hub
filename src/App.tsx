@@ -10,6 +10,9 @@ import BrowseGrounds from "./pages/BrowseGrounds";
 import CompareGrounds from "./pages/CompareGrounds";
 import GroundDetails from "./pages/GroundDetails";
 import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import Rewards from "./pages/Rewards";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +32,9 @@ const App = () => (
               <Route path="/compare" element={<CompareGrounds />} />
               <Route path="/ground/:id" element={<GroundDetails />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/rewards" element={<Rewards />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
