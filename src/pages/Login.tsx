@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/Logo";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,15 +15,41 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { signIn, signUp, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from || "/dashboard";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (user) {
+    navigate(from, { replace: true });
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // placeholder
+    if (!email || !password || (!isLogin && !name)) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      if (isLogin) {
+        await signIn(email, password);
+        navigate(from, { replace: true });
+      } else {
+        await signUp(email, password, name);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Authentication failed");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <main className="min-h-screen flex items-center justify-center relative overflow-hidden py-12 px-4">
-      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
       <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-1/4 left-1/4 w-72 h-72 rounded-full bg-accent/5 blur-3xl" />
@@ -33,15 +61,11 @@ const Login = () => {
         className="relative z-10 w-full max-w-md"
       >
         <div className="glass-card rounded-2xl p-8 space-y-6">
-          {/* Logo & Tagline */}
           <div className="text-center space-y-2">
-            <div className="flex justify-center mb-4">
-              <Logo />
-            </div>
+            <div className="flex justify-center mb-4"><Logo /></div>
             <p className="text-sm text-muted-foreground italic">"Every Game Starts Here."</p>
           </div>
 
-          {/* Toggle Tabs */}
           <div className="flex bg-secondary/50 rounded-xl p-1">
             <button
               onClick={() => setIsLogin(true)}
@@ -61,81 +85,50 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="bg-secondary/40 border-border/50"
-                />
+                <div className="relative">
+                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="pl-10 bg-secondary/40 border-border/50" />
+                </div>
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-secondary/40 border-border/50"
-                />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 bg-secondary/40 border-border/50" />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                {isLogin && (
-                  <button type="button" className="text-xs text-primary hover:underline">
-                    Forgot password?
-                  </button>
-                )}
+                {isLogin && <button type="button" className="text-xs text-primary hover:underline">Forgot password?</button>}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-secondary/40 border-border/50"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 bg-secondary/40 border-border/50" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" className="w-full btn-glow font-semibold" size="lg">
+            <Button type="submit" className="w-full btn-glow font-semibold" size="lg" disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
               {isLogin ? "Sign In" : "Create Account"}
-              <ArrowRight className="h-4 w-4 ml-1" />
+              {!submitting && <ArrowRight className="h-4 w-4 ml-1" />}
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or continue with</span>
-            </div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border/50" /></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">or continue with</span></div>
           </div>
 
-          {/* Google Login */}
-          <Button variant="outline" className="w-full border-border/50 hover:bg-secondary/50" size="lg">
+          <Button variant="outline" className="w-full border-border/50 hover:bg-secondary/50" size="lg" onClick={() => toast.info("Google login coming soon!")}>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
