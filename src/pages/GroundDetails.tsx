@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, MapPin, Clock, Phone, ChevronLeft, Calendar as CalendarIcon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,13 +8,21 @@ import { grounds, generateSlots, calculatePrice, getReviewsForGround } from "@/d
 import { useState } from "react";
 import { motion } from "framer-motion";
 import BookingSuccessModal from "@/components/BookingSuccessModal";
+import BookingFormDialog from "@/components/BookingFormDialog";
+import { useAuth } from "@/contexts/AuthContext";
+
+import { toast } from "@/components/ui/sonner";
 
 const GroundDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const ground = grounds.find((g) => g.id === id);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [successBooking, setSuccessBooking] = useState<{ groundName: string; date: string; time: string; total: number } | undefined>();
 
   if (!ground) {
     return (
@@ -32,7 +40,18 @@ const GroundDetails = () => {
   const selectedSlotObj = selectedSlot ? slots.find(s => s.start === selectedSlot) : null;
 
   const handleBookNow = () => {
-    if (selectedSlot) setShowSuccess(true);
+    if (!user) {
+      toast.error("Please login to book a slot");
+      navigate("/login");
+      return;
+    }
+    if (selectedSlot) setShowBookingForm(true);
+  };
+
+  const handleBookingSuccess = (booking: { bookingId: string; groundName: string; date: string; time: string; total: number }) => {
+    setSuccessBooking(booking);
+    setShowSuccess(true);
+    setSelectedSlot(null);
   };
 
   return (
@@ -225,15 +244,22 @@ const GroundDetails = () => {
         </div>
       </div>
 
+      {selectedSlot && selectedPricing && selectedSlotObj && (
+        <BookingFormDialog
+          open={showBookingForm}
+          onClose={() => setShowBookingForm(false)}
+          turfName={ground.name}
+          date={selectedDate.toISOString().split("T")[0]}
+          timeSlot={`${selectedSlotObj.start} - ${selectedSlotObj.end}`}
+          amount={selectedPricing.total}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
+
       <BookingSuccessModal
         open={showSuccess}
         onClose={() => setShowSuccess(false)}
-        booking={selectedSlot && selectedPricing && selectedSlotObj ? {
-          groundName: ground.name,
-          date: selectedDate.toLocaleDateString(),
-          time: `${selectedSlotObj.start} - ${selectedSlotObj.end}`,
-          total: selectedPricing.total,
-        } : undefined}
+        booking={successBooking}
       />
     </main>
   );
