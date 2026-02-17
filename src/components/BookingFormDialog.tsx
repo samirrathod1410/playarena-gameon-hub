@@ -121,7 +121,7 @@ const BookingFormDialog = ({ open, onClose, turfName, date, timeSlot, amount, on
               </div>
               <div>
                 <Label>Mobile Number *</Label>
-                <Input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="9876543210" className="bg-secondary/40 border-border/50" required maxLength={15} />
+                <Input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="8140074403" className="bg-secondary/40 border-border/50" required maxLength={15} />
               </div>
               <div>
                 <Label>Email *</Label>
