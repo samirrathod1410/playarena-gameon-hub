@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          admin_id: string
+          id: string
+          ip_address: string | null
+          login_time: string
+        }
+        Insert: {
+          admin_id: string
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+        }
+        Update: {
+          admin_id?: string
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          amount: number
+          booking_date: string
+          booking_id: string
+          created_at: string
+          email: string
+          id: string
+          mobile: string
+          name: string
+          payment_method: string
+          status: string
+          time_slot: string
+          turf_name: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          booking_date: string
+          booking_id: string
+          created_at?: string
+          email: string
+          id?: string
+          mobile: string
+          name: string
+          payment_method?: string
+          status?: string
+          time_slot: string
+          turf_name: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_date?: string
+          booking_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          mobile?: string
+          name?: string
+          payment_method?: string
+          status?: string
+          time_slot?: string
+          turf_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
