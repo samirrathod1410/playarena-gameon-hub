@@ -1,4 +1,4 @@
-const ADMIN_PHONE = "919876543210"; // Replace with actual admin number
+const ADMIN_PHONE = "918140074403"; // Replace with actual admin number
 
 export function formatPhoneForWhatsApp(phone: string): string {
   let cleaned = phone.replace(/[\s+\-()]/g, "");
