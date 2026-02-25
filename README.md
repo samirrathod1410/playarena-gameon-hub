@@ -82,3 +82,8 @@ For authentication/booking APIs to work in production, set these in **Vercel →
 
 Then redeploy (preferably **Redeploy with Clear Build Cache** once).
 
+ codex/fetch-login-and-booking-details-fyoe15
+- If Vercel build fails with `Cannot find module @rollup/rollup-linux-x64-gnu`, redeploy after this repo `vercel.json` change (it force-installs Rollup native package during install).
+
+
+ main

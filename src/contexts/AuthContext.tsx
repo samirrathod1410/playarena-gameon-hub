@@ -89,6 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
     toast.success("Welcome back!");
 
+ codex/fetch-login-and-booking-details-fyoe15
  codex/fetch-login-and-booking-details-pgjoxa
     // Never fail login if audit logging fails
     if (data.user) {
@@ -121,6 +122,7 @@ codex/fetch-login-and-booking-details-mluzpu
 
 
  main
+ main
     // Never fail login if audit logging fails
     if (data.user) {
       void (async () => {
@@ -147,6 +149,8 @@ codex/fetch-login-and-booking-details-mluzpu
           // ignore non-critical logging errors
         }
       })();
+ codex/fetch-login-and-booking-details-fyoe15
+
  codex/fetch-login-and-booking-details-mluzpu
 
     // Log login details so admin/owner can track all logins from dashboard
@@ -171,6 +175,7 @@ codex/fetch-login-and-booking-details-mluzpu
       }
  main
  main
+main
     }
   };
 
