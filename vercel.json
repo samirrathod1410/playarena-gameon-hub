@@ -1,4 +1,8 @@
 {
+ codex/fetch-login-and-booking-details-fyoe15
   "installCommand": "npm ci --include=optional || npm install --include=optional; npm install @rollup/rollup-linux-x64-gnu@4.24.0 --no-save || npm install @rollup/rollup-linux-x64-musl@4.24.0 --no-save",
+
+  "installCommand": "npm install --include=optional",
+ main
   "buildCommand": "npm run build"
 }
