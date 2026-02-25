@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
 type AppRole = "user" | "owner" | "admin";
@@ -32,12 +31,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [roles, setRoles] = useState<AppRole[]>([]);
 
   const fetchRoles = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    if (data) {
-      setRoles(data.map((r: any) => r.role as AppRole));
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      if (data) {
+        setRoles(data.map((r: { role: AppRole }) => r.role));
+      }
+    } catch {
+      // Never block auth flow if role fetch fails due to network issues
+      setRoles([]);
     }
   };
 
@@ -84,9 +88,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     toast.success("Welcome back!");
-    // Log admin login
+
+    // Never fail login if audit logging fails
     if (data.user) {
-      supabase.from("admin_logs").insert({ admin_id: data.user.id }).then(() => {});
+      void (async () => {
+        try {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", data.user.id);
+
+          const roles = roleData?.map((r: { role: AppRole }) => r.role) || [];
+
+          await supabase.from("login_logs").insert({
+            user_id: data.user.id,
+            email: data.user.email || email,
+            full_name: (data.user.user_metadata?.full_name as string | undefined) || null,
+            roles,
+            user_agent: navigator.userAgent,
+          });
+
+          if (roles.includes("admin") || roles.includes("owner")) {
+            await supabase.from("admin_logs").insert({ admin_id: data.user.id });
+          }
+        } catch {
+          // ignore non-critical logging errors
+        }
+      })();
     }
   };
 
