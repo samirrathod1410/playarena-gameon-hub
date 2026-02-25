@@ -89,6 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
     toast.success("Welcome back!");
 
+codex/fetch-login-and-booking-details-mluzpu
+
+
+ main
     // Never fail login if audit logging fails
     if (data.user) {
       void (async () => {
@@ -115,6 +119,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // ignore non-critical logging errors
         }
       })();
+ codex/fetch-login-and-booking-details-mluzpu
+
+    // Log login details so admin/owner can track all logins from dashboard
+    if (data.user) {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id);
+
+      const roles = roleData?.map((r: any) => r.role) || [];
+
+      supabase.from("login_logs").insert({
+        user_id: data.user.id,
+        email: data.user.email || email,
+        full_name: (data.user.user_metadata?.full_name as string | undefined) || null,
+        roles,
+        user_agent: navigator.userAgent,
+      }).then(() => {});
+
+      if (roles.includes("admin") || roles.includes("owner")) {
+        supabase.from("admin_logs").insert({ admin_id: data.user.id }).then(() => {});
+      }
+ main
     }
   };
 
