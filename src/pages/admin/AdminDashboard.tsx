@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, DollarSign, Users, Clock, TrendingUp } from "lucide-react";
+import { CalendarDays, DollarSign, Clock, TrendingUp, LogIn } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +27,19 @@ const AdminDashboard = () => {
     enabled: !!user,
   });
 
+  const { data: recentLogins = [] } = useQuery({
+    queryKey: ["admin-recent-logins"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("login_logs")
+        .select("id, email, full_name, roles, user_agent, login_time")
+        .order("login_time", { ascending: false })
+        .limit(15);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const today = new Date().toISOString().split("T")[0];
   const totalBookings = bookings.length;
   const todayBookings = bookings.filter((b: any) => b.booking_date === today).length;
@@ -39,6 +52,7 @@ const AdminDashboard = () => {
     { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: DollarSign, change: "" },
     { label: "Pending", value: pendingBookings.toString(), icon: Clock, change: "" },
     { label: "Confirmed", value: confirmedBookings.toString(), icon: TrendingUp, change: "" },
+    { label: "Recent Logins", value: recentLogins.length.toString(), icon: LogIn, change: "" },
   ];
 
   // Top turfs by booking count
@@ -64,7 +78,7 @@ const AdminDashboard = () => {
         <p className="text-muted-foreground text-xs mt-1">Today's Bookings: {todayBookings}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <Card className="glass-card">
@@ -100,6 +114,23 @@ const AdminDashboard = () => {
           </div>
         </CardContent>
       </Card>
+      <Card className="glass-card">
+        <CardHeader><CardTitle className="text-lg">Recent Login Details</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentLogins.length === 0 && <p className="text-sm text-muted-foreground">No login logs found.</p>}
+            {recentLogins.map((log: any) => (
+              <div key={log.id} className="p-3 rounded-xl bg-secondary/20 border border-border/20 space-y-1">
+                <p className="text-sm font-medium">{log.full_name || "User"} <span className="text-muted-foreground">({log.email})</span></p>
+                <p className="text-xs text-muted-foreground">Roles: {(log.roles || []).length ? log.roles.join(", ") : "user"}</p>
+                <p className="text-xs text-muted-foreground">Login Time: {new Date(log.login_time).toLocaleString()}</p>
+                {log.user_agent && <p className="text-xs text-muted-foreground line-clamp-1">Device: {log.user_agent}</p>}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 };

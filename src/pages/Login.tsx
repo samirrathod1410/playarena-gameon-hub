@@ -29,7 +29,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from || "/dashboard";
+  const from = ((location.state as { from?: string } | null)?.from) || "/dashboard";
 
   // Redirect if already logged in
   useEffect(() => {
@@ -50,21 +50,22 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) throw error;
-
+        await signIn(email, password);
         toast.success("Login successful 🎉");
         navigate(from, { replace: true });
       } else {
-        const { error } = await signUp(email, password, name);
-        if (error) throw error;
-
+        await signUp(email, password, name);
         toast.success("Account created successfully ✅");
         setIsLogin(true);
         setName("");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Authentication failed");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Authentication failed";
+      if (message.toLowerCase().includes("failed to fetch")) {
+        toast.error("Network issue: server se connect nahi ho paaya. Internet/Supabase config check karein.");
+      } else {
+        toast.error(message);
+      }
     } finally {
       setSubmitting(false);
     }
