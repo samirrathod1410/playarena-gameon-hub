@@ -35,6 +35,37 @@ export type Database = {
         }
         Relationships: []
       }
+
+      login_logs: {
+        Row: {
+          email: string
+          full_name: string | null
+          id: string
+          login_time: string
+          roles: string[]
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          email: string
+          full_name?: string | null
+          id?: string
+          login_time?: string
+          roles?: string[]
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          email?: string
+          full_name?: string | null
+          id?: string
+          login_time?: string
+          roles?: string[]
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           amount: number
