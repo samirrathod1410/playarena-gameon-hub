@@ -84,11 +84,11 @@ const AdminBookings = () => {
                   <span className="text-xs font-mono text-muted-foreground">{b.booking_id}</span>
                   <div>
                     <p className="text-sm font-medium">{b.name}</p>
-                    <p className="text-xs text-muted-foreground">{b.turf_name} • {b.mobile}</p>
+                    <p className="text-xs text-muted-foreground">{b.turf_name} • {b.mobile} • {b.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-xs text-muted-foreground">{b.booking_date} • {b.time_slot}</span>
+                  <span className="text-xs text-muted-foreground">{b.booking_date} • {b.time_slot} • {b.payment_method}</span>
                   <span className="text-sm font-semibold">₹{b.amount}</span>
                   <Badge className={`text-xs ${statusColors[b.status] || ""}`}>{b.status}</Badge>
                   {b.status === "Pending" && (
