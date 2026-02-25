@@ -71,3 +71,14 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+## Vercel Environment Variables (Required)
+
+For authentication/booking APIs to work in production, set these in **Vercel → Project Settings → Environment Variables**:
+
+- `VITE_SUPABASE_URL` **or** `VITE_SUPABASE_PROJECT_ID`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` **or** `VITE_SUPABASE_ANON_KEY`
+
+Then redeploy (preferably **Redeploy with Clear Build Cache** once).
+
